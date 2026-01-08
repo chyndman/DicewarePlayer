@@ -1,42 +1,67 @@
 #include <iostream>
 #include <random>
+#include <cctype>
 
 import Diceware;
 import WordList;
 
-std::string createRandomPassphrase()
+constexpr auto COLOR_OFF = "\033[0m";
+constexpr auto COLOR_BLUE = "\033[34m";
+constexpr auto COLOR_CYAN = "\033[36m";
+constexpr auto COLOR_GREEN = "\033[32m";
+constexpr auto COLOR_RED = "\033[31m";
+
+void printColored(std::ostream& os, const std::string& str)
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<unsigned> dist(0, 5);
+    auto currColor = COLOR_OFF;
+    auto prevColor = COLOR_OFF;
+    for (char c : str) {
+        if (' ' == c) {
+            // No change
+        } else if (islower(c)) {
+            currColor = COLOR_BLUE;
+        } else if (isupper(c)) {
+            currColor = COLOR_CYAN;
+        } else if (isdigit(c)) {
+            currColor = COLOR_RED;
+        } else {
+            currColor = COLOR_GREEN;
+        }
 
-    DicewarePassphraseProducer<5> pphProd(WORD_LIST_EFF_LONG, std::make_unique<MyDicewarePassphraseMutator>());
-    
-    size_t rolls = pphProd.getRequiredRollCount();
-    while (0 < rolls--) {
-        pphProd.handleRoll(dist(gen));
+        if (currColor != prevColor) {
+            prevColor = currColor;
+            os << currColor;
+        }
+        os << c;
     }
-
-    return pphProd.getPassphrase(true);
+    os << COLOR_OFF;
 }
 
 int main(int argc, char* argv[])
 {
+    DicewarePassphraseProducer<5> pphProd(WORD_LIST_EFF_LONG, std::make_unique<MyDicewarePassphraseMutator>());
+    auto rolls = pphProd.getRequiredRollCount();
+
     if (2 <= argc) {
-        DicewarePassphraseProducer<5> pphProd(WORD_LIST_EFF_LONG, std::make_unique<MyDicewarePassphraseMutator>());
-        auto len = strlen(argv[1]);
-        for (unsigned i = 0; i < len; i++) {
-            char c = argv[1][i];
-            if ('1' <= c && c <= '6') {
-                pphProd.handleRoll(static_cast<unsigned>(c - '1'));
-                if (pphProd.getRollCount() >= pphProd.getRequiredRollCount()) {
-                    std::cout << pphProd.getPassphrase(true) << std::endl;
-                    return 0;
-                }
+        for (char* c = argv[1]; 0 < rolls && '\0' != *c; c++) {
+            if ('1' <= *c && *c <= '6') {
+                pphProd.handleRoll(static_cast<unsigned>(*c - '1'));
+                rolls--;
             }
         }
+    } else {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<unsigned> dist(0, 5);
+        while (0 < rolls--) {
+            pphProd.handleRoll(dist(gen));
+        }
+    }
+
+    if (pphProd.getRollCount() < pphProd.getRequiredRollCount()) {
         std::cerr << "Need " << pphProd.getRequiredRollCount() << " rolls but only got " << pphProd.getRollCount() << std::endl;
     } else {
-        std::cout << createRandomPassphrase() << std::endl;
+        printColored(std::cout, pphProd.getPassphrase(true));
+        std::cout << std::endl;
     }
 }
