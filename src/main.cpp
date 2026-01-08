@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
             if ('1' <= c && c <= '6') {
                 pphProd.handleRoll(static_cast<unsigned>(c - '1'));
                 if (pphProd.getRollCount() >= pphProd.getRequiredRollCount()) {
-                    std::cout << pphProd.getPassphrase() << std::endl;
+                    std::cout << pphProd.getPassphrase(true) << std::endl;
                     return 0;
                 }
             }
