@@ -28,7 +28,7 @@ public:
     static constexpr size_t k_seqCount = getSequenceCountForDiceRollCount(KWordRollCount);
     static constexpr size_t k_wordCount = 6;
 
-    explicit DicewarePassphraseProducer<KWordRollCount>(const std::array<const char*, k_seqCount>& wordList, std::unique_ptr<DicewarePassphraseMutator> mutator);
+    explicit DicewarePassphraseProducer(const std::array<const char*, k_seqCount>& wordList, std::unique_ptr<DicewarePassphraseMutator> mutator);
     std::string getPassphrase(bool spaces = false) const;
     
     size_t getRollCount() const;
