@@ -43,11 +43,22 @@ int main(int argc, char* argv[])
     auto rolls = pphProd.getRequiredRollCount();
 
     if (2 <= argc) {
-        for (char* c = argv[1]; 0 < rolls && '\0' != *c; c++) {
-            if ('1' <= *c && *c <= '6') {
-                pphProd.handleRoll(static_cast<unsigned>(*c - '1'));
+        unsigned argi = 1;
+        unsigned ci = 0;
+        while (0 < rolls--) {
+            char c = argv[argi][ci];
+            if ('\0' == c) {
+                if (++argi == static_cast<unsigned>(argc)) {
+                    break;
+                } else {
+                    ci = 0;
+                    continue;
+                }
+            } else if ('1' <= c && c <= '6') {
+                pphProd.handleRoll(static_cast<unsigned>(c - '1'));
                 rolls--;
             }
+            ci++;
         }
     } else {
         std::random_device rd;
