@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     if (2 <= argc) {
         unsigned argi = 1;
         unsigned ci = 0;
-        while (0 < rolls--) {
+        while (0 < rolls) {
             char c = argv[argi][ci];
             if ('\0' == c) {
                 if (++argi == static_cast<unsigned>(argc)) {
